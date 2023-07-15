@@ -64,7 +64,6 @@ namespace PortalGun
 
         Transform portalTransform;
 
-        int portalCount = 0;
         void Start()
         {
             /* A lot of Gorilla Tag systems will not be set up when start is called /*
@@ -80,8 +79,10 @@ namespace PortalGun
 
             HarmonyPatches.ApplyHarmonyPatches();
 
-
-            EnableThePortalGun();
+            if (inRoom)
+            {
+                EnableThePortalGun();
+            }
         }
 
         void OnDisable()
@@ -91,8 +92,10 @@ namespace PortalGun
             /* Code here runs whenever your mod is disabled (including if it disabled on startup)*/
 
             HarmonyPatches.RemoveHarmonyPatches();
-
-            DisableThePortalGun();
+            if (inRoom)
+            {
+                DisableThePortalGun();
+            }
         }
 
         void OnGameInitialized(object sender, EventArgs e)
