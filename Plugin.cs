@@ -31,6 +31,7 @@ namespace PortalGun
         bool isSecondaryL;
         bool canSecondaryL;
         public bool isBlue = false;
+        private int layerMask;
 
         GameObject _portalGun;
         GameObject HandR;
@@ -110,8 +111,9 @@ namespace PortalGun
 
         void SpawnPortal(bool isBlue)
         {
-
-            if (Physics.Raycast(portalTransform.position, portalTransform.forward, out hit))
+            layerMask = 1 << LayerMask.NameToLayer("Gorilla Boundary");
+            layerMask = ~layerMask;
+            if (Physics.Raycast(portalTransform.position, portalTransform.forward, out hit, Mathf.Infinity, layerMask))
             {
                 if (isBlue)
                 {
@@ -293,6 +295,7 @@ namespace PortalGun
                     canTriggerL = true;
                 }
             }
+
         }
 
         /* This attribute tells Utilla to call this method when a modded room is joined */
