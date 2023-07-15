@@ -20,8 +20,16 @@ namespace PortalGun
     public class Plugin : BaseUnityPlugin
     {
         bool inRoom;
-        bool isTrigger;
-        bool canTrigger;
+        bool isPrimaryR;
+        bool canPrimaryR;
+        bool isPrimaryL;
+        bool canPrimaryL;
+        bool isSecondaryR;
+        bool canSecondaryR;
+        bool isTriggerL;
+        bool canTriggerL;
+        bool isSecondaryL;
+        bool canSecondaryL;
         public bool isBlue = false;
 
         GameObject _portalGun;
@@ -36,17 +44,20 @@ namespace PortalGun
         AudioSource portalEnter1AudioSource;
         AudioSource portalEnter2AudioSource;
         AudioSource portalEnter3AudioSource;
+        AudioSource songAudioSource;
 
         GameObject activation;
         GameObject fireOrange;
         GameObject fireBlue;
         GameObject reset;
+        GameObject song;
         public GameObject portalEnter1;
         public GameObject portalEnter2;
         public GameObject portalEnter3;
 
         Portals orange, blue;
         private readonly XRNode rNode = XRNode.RightHand;
+        private readonly XRNode lNode = XRNode.LeftHand;
 
         RaycastHit hit;
 
@@ -69,6 +80,7 @@ namespace PortalGun
             HarmonyPatches.ApplyHarmonyPatches();
 
 
+            EnableThePortalGun();
         }
 
         void OnDisable()
@@ -78,58 +90,87 @@ namespace PortalGun
             /* Code here runs whenever your mod is disabled (including if it disabled on startup)*/
 
             HarmonyPatches.RemoveHarmonyPatches();
+
+            DisableThePortalGun();
         }
 
         void OnGameInitialized(object sender, EventArgs e)
         {
             /* Code here runs after the game initializes (i.e. GorillaLocomotion.Player.Instance != null) */
-            Stream _str = Assembly.GetExecutingAssembly().GetManifestResourceStream("PortalGun.Assets.blueportal");
-            AssetBundle _asset = AssetBundle.LoadFromStream(_str);
-            bluePortal = _asset.LoadAsset<GameObject>("Blue Portal");
+            SpawnPortalGun();
+            DisableThePortalGun();
+        }
 
-            Stream __str = Assembly.GetExecutingAssembly().GetManifestResourceStream("PortalGun.Assets.orangeportal");
-            AssetBundle __asset = AssetBundle.LoadFromStream(__str);
-            orangePortal = __asset.LoadAsset<GameObject>("Orange Portal");
+        void ResetPortalGun()
+        {
+            blue.transform.position = new Vector3(0f, 0f, 0f);
+            orange.transform.position = new Vector3(0f, 0f, 0f);
+            reset.GetComponent<AudioSource>().Play();
+        }
 
-            Stream ___str = Assembly.GetExecutingAssembly().GetManifestResourceStream("PortalGun.Assets.activation");
-            AssetBundle ___asset = AssetBundle.LoadFromStream(___str);
-            activationAudioSource = ___asset.LoadAsset<GameObject>("Activation Audio Source").GetComponent<AudioSource>();
-            activation = Instantiate(activationAudioSource.gameObject);
+        void SpawnPortal(bool isBlue)
+        {
 
-            Stream _____str = Assembly.GetExecutingAssembly().GetManifestResourceStream("PortalGun.Assets.fireblue");
-            AssetBundle _____asset = AssetBundle.LoadFromStream(_____str);
-            fireBlueAudioSource = _____asset.LoadAsset<GameObject>("Fire Blue Audio Source").GetComponent<AudioSource>();
-            fireBlue = Instantiate(fireBlueAudioSource.gameObject);
+            if (Physics.Raycast(portalTransform.position, portalTransform.forward, out hit))
+            {
+                if (isBlue)
+                {
+                    blue.transform.position = hit.point;
+                    blue.transform.rotation = Quaternion.LookRotation(hit.normal);
+                    fireBlue.GetComponent<AudioSource>().Play();
+                    blue.exitPortal = orange;
+                    orange.exitPortal = blue;
+                }
+                else if (!isBlue)
+                {
+                    orange.transform.position = hit.point;
+                    orange.transform.rotation = Quaternion.LookRotation(hit.normal);
+                    fireOrange.GetComponent<AudioSource>().Play();
+                    orange.exitPortal = blue;
+                    blue.exitPortal = orange;
+                    
+                }
+            }
+        }
 
-            Stream ______str = Assembly.GetExecutingAssembly().GetManifestResourceStream("PortalGun.Assets.fireorange");
-            AssetBundle ______asset = AssetBundle.LoadFromStream(______str);
-            fireOrangeAudioSource = ______asset.LoadAsset<GameObject>("Fire Orange Audio Source").GetComponent<AudioSource>();
-            fireOrange = Instantiate(fireOrangeAudioSource.gameObject);
-
-            Stream _______str = Assembly.GetExecutingAssembly().GetManifestResourceStream("PortalGun.Assets.portalgunreset");
-            AssetBundle _______asset = AssetBundle.LoadFromStream(_______str);
-            resetAudioSource = _______asset.LoadAsset<GameObject>("Reset Audio Source").GetComponent<AudioSource>();
-            reset = Instantiate(resetAudioSource.gameObject);
-
-            Stream ________str = Assembly.GetExecutingAssembly().GetManifestResourceStream("PortalGun.Assets.portalenter1");
-            AssetBundle ________asset = AssetBundle.LoadFromStream(________str);
-            portalEnter1AudioSource = ________asset.LoadAsset<GameObject>("Teleport Audio Source 1").AddComponent<AudioSource>();
-            portalEnter1 = Instantiate(portalEnter1AudioSource.gameObject);
-
-            Stream _________str = Assembly.GetExecutingAssembly().GetManifestResourceStream("PortalGun.Assets.portalenter2");
-            AssetBundle _________asset = AssetBundle.LoadFromStream(_________str);
-            portalEnter2AudioSource = _________asset.LoadAsset<GameObject>("Teleport Audio Source 2").GetComponent<AudioSource>();
-            portalEnter2 = Instantiate(portalEnter2AudioSource.gameObject);
-
-            Stream __________str = Assembly.GetExecutingAssembly().GetManifestResourceStream("PortalGun.Assets.portalenter3");
-            AssetBundle __________asset = AssetBundle.LoadFromStream(__________str);
-            portalEnter3AudioSource = __________asset.LoadAsset<GameObject>("Teleport Audio Source 3").GetComponent<AudioSource>();
-            portalEnter3 = Instantiate(portalEnter3AudioSource.gameObject);
-
-            Stream str = Assembly.GetExecutingAssembly().GetManifestResourceStream("PortalGun.Assets.portalgun");
+        void SpawnPortalGun()
+        {
+            Stream str = Assembly.GetExecutingAssembly().GetManifestResourceStream("PortalGun.Assets.prefabshit");
             AssetBundle asset = AssetBundle.LoadFromStream(str);
             GameObject portalGun = asset.LoadAsset<GameObject>("portal gun");
             _portalGun = Instantiate(portalGun);
+
+            portalEnter3AudioSource = asset.LoadAsset<GameObject>("Teleport Audio Source 3").GetComponent<AudioSource>();
+            portalEnter3 = Instantiate(portalEnter3AudioSource.gameObject);
+
+            bluePortal = asset.LoadAsset<GameObject>("Blue Portal");
+            blue = Instantiate(bluePortal).AddComponent<Portals>();
+            blue.transform.position = new Vector3(0f, 0f, 0f);
+
+            orangePortal = asset.LoadAsset<GameObject>("Orange Portal");
+            orange = Instantiate(orangePortal).AddComponent<Portals>();
+            orange.transform.position = new Vector3(0f, 0f, 0f);
+
+            activationAudioSource = asset.LoadAsset<GameObject>("Activation Audio Source").GetComponent<AudioSource>();
+            activation = Instantiate(activationAudioSource.gameObject);
+
+            songAudioSource = asset.LoadAsset<GameObject>("Song Audio Source").GetComponent<AudioSource>();
+            song = Instantiate(songAudioSource.gameObject);
+
+            fireBlueAudioSource = asset.LoadAsset<GameObject>("Fire Blue Audio Source").GetComponent<AudioSource>();
+            fireBlue = Instantiate(fireBlueAudioSource.gameObject);
+
+            fireOrangeAudioSource = asset.LoadAsset<GameObject>("Fire Orange Audio Source").GetComponent<AudioSource>();
+            fireOrange = Instantiate(fireOrangeAudioSource.gameObject);
+
+            resetAudioSource = asset.LoadAsset<GameObject>("Reset Audio Source").GetComponent<AudioSource>();
+            reset = Instantiate(resetAudioSource.gameObject);
+
+            portalEnter1AudioSource = asset.LoadAsset<GameObject>("Teleport Audio Source 1").AddComponent<AudioSource>();
+            portalEnter1 = Instantiate(portalEnter1AudioSource.gameObject);
+
+            portalEnter2AudioSource = asset.LoadAsset<GameObject>("Teleport Audio Source 2").GetComponent<AudioSource>();
+            portalEnter2 = Instantiate(portalEnter2AudioSource.gameObject);
 
             HandR = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/shoulder.R/upper_arm.R/forearm.R/hand.R/palm.01.R/");
             _portalGun.transform.SetParent(HandR.transform, false);
@@ -143,101 +184,115 @@ namespace PortalGun
             portalTransform.localPosition = new Vector3(-0.03049f, -0.00613f, 0f);
             portalTransform.localRotation = Quaternion.Euler(0f, -90.00001f, 0f);
 
-            activation.GetComponent<AudioSource>().Play();
-
             isBlue = true;
 
+            DisableThePortalGun();
         }
-        void SpawnPortal()
+
+        void DisableThePortalGun()
         {
-
-            if (Physics.Raycast(portalTransform.position, portalTransform.forward, out hit))
-            {
-                portalCount++;
-                if (portalCount > 2)
-                {
-                    return;
-                }
-                if (portalCount == 1)
-                {
-                    isBlue = true;
-                }
-                else if (portalCount == 2)
-                {
-                    isBlue = false;
-                }
-
-                if (isBlue)
-                {
-                    if (blue.gameObject != null)
-                    {
-                        Destroy(blue.gameObject);
-                        blue = Instantiate(bluePortal, hit.point, Quaternion.LookRotation(hit.normal)).AddComponent<Portals>();
-                        fireBlue.GetComponent<AudioSource>().Play();
-                        blue.exitPortal = orange;
-                        orange.exitPortal = blue;
-                    }
-                    else if (blue.gameObject == null)
-                    {
-                        blue = Instantiate(bluePortal, hit.point, Quaternion.LookRotation(hit.normal)).AddComponent<Portals>();
-                        fireBlue.GetComponent<AudioSource>().Play();
-                        blue.exitPortal = orange;
-                        orange.exitPortal = blue;
-                    }
-                }
-                else if (!isBlue)
-                {
-                    if (orange.gameObject != null)
-                    {
-                        Destroy(orange.gameObject);
-                        orange = Instantiate(orangePortal, hit.point, Quaternion.LookRotation(hit.normal)).AddComponent<Portals>();
-                        fireOrange.GetComponent<AudioSource>().Play();
-                        orange.exitPortal = blue;
-                        blue.exitPortal = orange;
-                    }
-                    else if (orange.gameObject == null)
-                    {
-                        orange = Instantiate(orangePortal, hit.point, Quaternion.LookRotation(hit.normal)).AddComponent<Portals>();
-                        fireOrange.GetComponent<AudioSource>().Play();
-                        orange.exitPortal = blue;
-                        blue.exitPortal = orange;
-                    }
-                }
-            }
-
+            _portalGun.SetActive(false);
+            orange.enabled = false;
+            blue.enabled = false;
+            orange.gameObject.SetActive(false);
+            blue.gameObject.SetActive(false);
+            activation.SetActive(false);
+            reset.SetActive(false);
+            fireBlue.SetActive(false);
+            fireOrange.SetActive(false);
+            song.SetActive(false);
         }
 
-        void SpawnPortulGun()
+        void EnableThePortalGun()
         {
-
+            _portalGun.SetActive(true);
+            orange.enabled = true;
+            blue.enabled = true;
+            orange.gameObject.SetActive(true);
+            blue.gameObject.SetActive(true);
+            activation.SetActive(true);
+            reset.SetActive(true);
+            fireBlue.SetActive(true);
+            fireOrange.SetActive(true);
+            song.SetActive(true);
+            activation.GetComponent<AudioSource>().Play();
         }
-
         void Update()
         {
             /* Code here runs every frame when the mod is enabled */
-            if (portalCount > 2)
-            {            
-                portalCount = 1;
-                isBlue = false;
-                reset.GetComponent<AudioSource>().Play();
-            }
-
-            InputDevices.GetDeviceAtXRNode(rNode).TryGetFeatureValue(CommonUsages.triggerButton, out isTrigger);
-
-            if (isTrigger)
+            if (inRoom)
             {
-                if (canTrigger)
+                InputDevices.GetDeviceAtXRNode(rNode).TryGetFeatureValue(CommonUsages.primaryButton, out isPrimaryR);
+                InputDevices.GetDeviceAtXRNode(rNode).TryGetFeatureValue(CommonUsages.secondaryButton, out isSecondaryR);
+                InputDevices.GetDeviceAtXRNode(lNode).TryGetFeatureValue(CommonUsages.primaryButton, out isPrimaryL);
+                InputDevices.GetDeviceAtXRNode(lNode).TryGetFeatureValue(CommonUsages.secondaryButton, out isSecondaryL);
+                InputDevices.GetDeviceAtXRNode(lNode).TryGetFeatureValue(CommonUsages.triggerButton, out isTriggerL);
+
+                if (isPrimaryR)
                 {
-                    SpawnPortal();
-                    canTrigger = false;
+                    if (canPrimaryR)
+                    {
+                        SpawnPortal(true);
+                        canPrimaryR = false;
+                    }
+                }
+                else
+                {
+                    canPrimaryR = true;
+                }
+
+                if (isSecondaryR)
+                {
+                    if (canSecondaryR)
+                    {
+                        SpawnPortal(false);
+                        canSecondaryR = false;
+                    }
+                }
+                else
+                {
+                    canSecondaryR = true;
+                }
+
+                if (isPrimaryL)
+                {
+                    if (canPrimaryL)
+                    {
+                        ResetPortalGun();
+                        canPrimaryL = false;
+                    }
+                }
+                else
+                {
+                    canPrimaryL = true;
+                }
+
+                if (isSecondaryL)
+                {
+                    if (canSecondaryL)
+                    {
+                        song.GetComponent<AudioSource>().Play();
+                        canSecondaryL = false;
+                    }
+                }
+                else
+                {
+                    canSecondaryL = true;
+                }
+
+                if (isTriggerL)
+                {
+                    if (canTriggerL)
+                    {
+                        song.GetComponent<AudioSource>().Stop();
+                        canTriggerL = false;
+                    }
+                }
+                else
+                {
+                    canTriggerL = true;
                 }
             }
-            else
-            {
-                canTrigger = true;
-            }
-
-
         }
 
         /* This attribute tells Utilla to call this method when a modded room is joined */
@@ -246,6 +301,7 @@ namespace PortalGun
         {
             /* Activate your mod here */
             /* This code will run regardless of if the mod is enabled*/
+            EnableThePortalGun();
 
             inRoom = true;
         }
@@ -256,7 +312,7 @@ namespace PortalGun
         {
             /* Deactivate your mod here */
             /* This code will run regardless of if the mod is enabled*/
-
+            DisableThePortalGun();
             inRoom = false;
         }
     }

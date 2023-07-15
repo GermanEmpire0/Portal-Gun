@@ -18,7 +18,6 @@ namespace PortalGun
         private static Vector3 _teleportPosition;
         private static float _teleportRotation;
         private static bool _killVelocity;
-        static Plugin portalInfo;
 
         void Update()
         {
@@ -67,7 +66,6 @@ namespace PortalGun
 
         internal static void TeleportPlayer(Vector3 destinationPosition, float destinationRotation, bool killVelocity = false)
         {
-            int portalEnterSoundRandom = Random.Range(1, 4);
             if (_isTeleporting)
                 return;
             _killVelocity = killVelocity;
@@ -75,18 +73,6 @@ namespace PortalGun
             _teleportRotation = destinationRotation;
             _isTeleporting = true;
             _rotate = true;
-            if (portalEnterSoundRandom == 1)
-            {
-                portalInfo.portalEnter1.GetComponent<AudioSource>().Play();
-            }
-            else if (portalEnterSoundRandom == 2)
-            {
-                portalInfo.portalEnter2.GetComponent<AudioSource>().Play();
-            }
-            else if (portalEnterSoundRandom == 3)
-            {
-                portalInfo.portalEnter3.GetComponent<AudioSource>().Play();
-            }
         }
     }
 }

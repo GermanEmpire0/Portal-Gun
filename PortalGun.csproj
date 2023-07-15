@@ -16,19 +16,11 @@
     <None Remove="Assets\portalenter3" />
     <None Remove="Assets\portalgun" />
     <None Remove="Assets\portalgunreset" />
+    <None Remove="Assets\prefabshit" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Assets\activation" />
-    <EmbeddedResource Include="Assets\blueportal" />
-    <EmbeddedResource Include="Assets\fireblue" />
-    <EmbeddedResource Include="Assets\fireorange" />
-    <EmbeddedResource Include="Assets\orangeportal" />
-    <EmbeddedResource Include="Assets\portalenter1" />
-    <EmbeddedResource Include="Assets\portalenter2" />
-    <EmbeddedResource Include="Assets\portalenter3" />
-    <EmbeddedResource Include="Assets\portalgun" />
-    <EmbeddedResource Include="Assets\portalgunreset" />
+    <EmbeddedResource Include="Assets\prefabshit" />
   </ItemGroup>
 
   <ItemGroup>
