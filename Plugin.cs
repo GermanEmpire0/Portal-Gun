@@ -5,6 +5,7 @@ using Utilla;
 using System.IO;
 using System.Reflection;
 using UnityEngine.XR;
+using UnityEngine.XR.Interaction.Toolkit;
 
 namespace PortalGun
 {
@@ -37,6 +38,7 @@ namespace PortalGun
         GameObject HandR;
         GameObject bluePortal;
         GameObject orangePortal;
+        GameObject cube;
 
         AudioSource activationAudioSource;
         AudioSource fireBlueAudioSource;
@@ -148,6 +150,9 @@ namespace PortalGun
             portalEnter3AudioSource = asset.LoadAsset<GameObject>("Teleport Audio Source 3").GetComponent<AudioSource>();
             portalEnter3 = Instantiate(portalEnter3AudioSource.gameObject);
 
+            GameObject portalCube = asset.LoadAsset<GameObject>("portalcube");
+            cube = Instantiate(portalCube.gameObject);
+
             bluePortal = asset.LoadAsset<GameObject>("Blue Portal");
             blue = Instantiate(bluePortal).AddComponent<Portals>();
             blue.transform.position = new Vector3(0f, 0f, 0f);
@@ -177,7 +182,7 @@ namespace PortalGun
             portalEnter2AudioSource = asset.LoadAsset<GameObject>("Teleport Audio Source 2").GetComponent<AudioSource>();
             portalEnter2 = Instantiate(portalEnter2AudioSource.gameObject);
 
-            HandR = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/shoulder.R/upper_arm.R/forearm.R/hand.R/palm.01.R/");
+            HandR = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/rig/body/shoulder.R/upper_arm.R/forearm.R/hand.R/palm.01.R/");
             _portalGun.transform.SetParent(HandR.transform, false);
             _portalGun.transform.position = new Vector3(-139.96f, 27.1682f, -102.0313f);
             _portalGun.transform.localPosition = new Vector3(-0.0562f, 0.2447f, -0.0767f);
@@ -188,6 +193,13 @@ namespace PortalGun
             portalTransform.SetParent(_portalGun.transform, false);
             portalTransform.localPosition = new Vector3(-0.03049f, -0.00613f, 0f);
             portalTransform.localRotation = Quaternion.Euler(0f, -90.00001f, 0f);
+
+            cube.transform.position = new Vector3(-64.7505f, 11.3692f, -78.3085f);
+            cube.transform.localPosition = new Vector3(-64.7505f, 11.3692f, -78.3085f);
+            cube.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            cube.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            cube.AddComponent<Rigidbody>();
+            cube.AddComponent<XRGrabInteractable>();
 
             isBlue = true;
 
